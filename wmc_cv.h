@@ -81,6 +81,16 @@ protected:
     static uint16_t m_cvNumber;    /* Cv number to be changed. */
     static uint16_t m_cvValue;     /* Value of cv number. */
     static uint8_t m_timeOutCount; /* Counter for timeout handling. */
+
+    static const uint16_t STEP_1            = 1;   /* In - decrease by 1 */
+    static const uint16_t STEP_10           = 10;  /* Increase by 10 */
+    static const uint16_t STEP_100          = 100; /* Increase by 100 */
+    static const uint16_t CV_DEFAULT_NUMBER = 1;   /* Default cv number */
+    static const uint16_t CV_DEFAULT_VALUE  = 0;   /* Default cv value */
+    static const uint16_t CV_MAX_NUMBER     = 999; /* Maximum CV number. */
+    static const uint16_t CV_MAX_VALUE      = 255; /* Maximum cv value. */
+    static const uint8_t TIME_OUT_20_SEC    = 40;  /* Timeout counter max value based on 0.5sec update. */
+    static const uint8_t TIME_OUT_10_SEC    = 20;  /* Timeout counter max value based on 0.5sec update. */
 };
 
 #endif

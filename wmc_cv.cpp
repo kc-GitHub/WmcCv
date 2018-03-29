@@ -30,8 +30,8 @@ class EnterCvWrite;
 
 /* Init variables. */
 WmcTft wmcCv::m_wmcCvTft;
-uint16_t wmcCv::m_cvNumber    = 1;
-uint16_t wmcCv::m_cvValue     = 0;
+uint16_t wmcCv::m_cvNumber    = CV_DEFAULT_NUMBER;
+uint16_t wmcCv::m_cvValue     = CV_DEFAULT_VALUE;
 uint8_t wmcCv::m_timeOutCount = 0;
 
 /***********************************************************************************************************************
@@ -55,8 +55,8 @@ class Idle : public wmcCv
         switch (e.EventData)
         {
         case start:
-            m_cvValue  = 1;
-            m_cvNumber = 1;
+            m_cvValue  = CV_DEFAULT_NUMBER;
+            m_cvNumber = CV_DEFAULT_VALUE;
             transit<EnterCvNumber>();
             break;
         case stop:
@@ -97,14 +97,14 @@ class EnterCvNumber : public wmcCv
             }
             else if (e.EventData.Delta < 0)
             {
-                if (m_cvNumber > 1)
+                if (m_cvNumber > CV_DEFAULT_NUMBER)
                 {
                     m_cvNumber--;
                     DataChanged = true;
                 }
                 else
                 {
-                    m_cvNumber  = 999;
+                    m_cvNumber  = CV_MAX_NUMBER;
                     DataChanged = true;
                 }
             }
@@ -112,26 +112,26 @@ class EnterCvNumber : public wmcCv
         case pushturn:
             if (e.EventData.Delta > 0)
             {
-                m_cvNumber += 10;
+                m_cvNumber += STEP_10;
                 DataChanged = true;
             }
             else if (e.EventData.Delta < 0)
             {
-                if (m_cvNumber > 10)
+                if (m_cvNumber > STEP_10)
                 {
-                    m_cvNumber -= 10;
+                    m_cvNumber -= STEP_10;
                     DataChanged = true;
                 }
                 else
                 {
-                    if (m_cvNumber > 1)
+                    if (m_cvNumber > CV_DEFAULT_NUMBER)
                     {
-                        m_cvNumber -= 1;
+                        m_cvNumber -= STEP_1;
                         DataChanged = true;
                     }
                     else
                     {
-                        m_cvNumber  = 999;
+                        m_cvNumber  = CV_MAX_NUMBER;
                         DataChanged = true;
                     }
                 }
@@ -149,9 +149,9 @@ class EnterCvNumber : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvNumber > 999)
+            if (m_cvNumber > CV_MAX_NUMBER)
             {
-                m_cvNumber = 1;
+                m_cvNumber = CV_DEFAULT_NUMBER;
             }
             m_wmcCvTft.ShowDccNumber(m_cvNumber, false);
         }
@@ -167,19 +167,19 @@ class EnterCvNumber : public wmcCv
         switch (e.EventData.Button)
         {
         case button_0:
-            m_cvNumber  = 1;
+            m_cvNumber  = CV_DEFAULT_NUMBER;
             DataChanged = true;
             break;
         case button_1:
-            m_cvNumber += 1;
+            m_cvNumber += STEP_1;
             DataChanged = true;
             break;
         case button_2:
-            m_cvNumber += 10;
+            m_cvNumber += STEP_10;
             DataChanged = true;
             break;
         case button_3:
-            m_cvNumber += 100;
+            m_cvNumber += STEP_100;
             DataChanged = true;
             break;
         case button_4:
@@ -190,9 +190,9 @@ class EnterCvNumber : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvNumber > 999)
+            if (m_cvNumber > CV_MAX_NUMBER)
             {
-                m_cvNumber = 999;
+                m_cvNumber = CV_DEFAULT_NUMBER;
             }
             m_wmcCvTft.ShowDccNumber(m_cvNumber, false);
         }
@@ -252,7 +252,7 @@ class EnterCvValueRead : public wmcCv
             m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
 
             /* If after 20 seconds still no response continue.... */
-            if (m_timeOutCount > 40)
+            if (m_timeOutCount > TIME_OUT_20_SEC)
             {
                 transit<EnterCvValueChange>();
             }
@@ -291,14 +291,14 @@ class EnterCvValueChange : public wmcCv
             }
             else if (e.EventData.Delta < 0)
             {
-                if (m_cvValue > 0)
+                if (m_cvValue > CV_DEFAULT_VALUE)
                 {
                     m_cvValue--;
                     DataChanged = true;
                 }
                 else
                 {
-                    m_cvValue   = 255;
+                    m_cvValue   = CV_MAX_VALUE;
                     DataChanged = true;
                 }
             }
@@ -306,26 +306,26 @@ class EnterCvValueChange : public wmcCv
         case pushturn:
             if (e.EventData.Delta > 0)
             {
-                m_cvValue += 10;
+                m_cvValue += STEP_10;
                 DataChanged = true;
             }
             else if (e.EventData.Delta < 0)
             {
-                if (m_cvValue > 10)
+                if (m_cvValue > STEP_10)
                 {
-                    m_cvValue -= 10;
+                    m_cvValue -= STEP_10;
                     DataChanged = true;
                 }
                 else
                 {
-                    if (m_cvValue > 0)
+                    if (m_cvValue > CV_DEFAULT_VALUE)
                     {
-                        m_cvValue -= 1;
+                        m_cvValue -= STEP_1;
                         DataChanged = true;
                     }
                     else
                     {
-                        m_cvValue   = 255;
+                        m_cvValue   = CV_MAX_VALUE;
                         DataChanged = true;
                     }
                 }
@@ -342,9 +342,9 @@ class EnterCvValueChange : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvValue > 255)
+            if (m_cvValue > CV_MAX_VALUE)
             {
-                m_cvValue = 0;
+                m_cvValue = CV_DEFAULT_VALUE;
             }
             m_wmcCvTft.ShowDccValue(m_cvValue, false);
         }
@@ -360,19 +360,19 @@ class EnterCvValueChange : public wmcCv
         switch (e.EventData.Button)
         {
         case button_0:
-            m_cvValue   = 1;
+            m_cvValue   = STEP_1;
             DataChanged = true;
             break;
         case button_1:
-            m_cvValue += 1;
+            m_cvValue += STEP_1;
             DataChanged = true;
             break;
         case button_2:
-            m_cvValue += 10;
+            m_cvValue += STEP_10;
             DataChanged = true;
             break;
         case button_3:
-            m_cvValue += 100;
+            m_cvValue += STEP_100;
             DataChanged = true;
             break;
         case button_4:
@@ -383,9 +383,9 @@ class EnterCvValueChange : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvValue > 255)
+            if (m_cvValue > CV_MAX_VALUE)
             {
-                m_cvValue = 0;
+                m_cvValue = CV_DEFAULT_VALUE;
             }
             m_wmcCvTft.ShowDccValue(m_cvValue, false);
         }
@@ -447,7 +447,7 @@ class EnterCvWrite : public wmcCv
             m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
 
             /* If after 10 seconds still no response continue.... */
-            if (m_timeOutCount > 20)
+            if (m_timeOutCount > TIME_OUT_10_SEC)
             {
                 transit<EnterCvValueChange>();
             }
