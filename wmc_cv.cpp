@@ -55,8 +55,8 @@ class Idle : public wmcCv
         switch (e.EventData)
         {
         case start:
-            m_cvValue  = CV_DEFAULT_NUMBER;
-            m_cvNumber = CV_DEFAULT_VALUE;
+            m_cvValue  = CV_DEFAULT_VALUE;
+            m_cvNumber = CV_DEFAULT_NUMBER;
             transit<EnterCvNumber>();
             break;
         case stop:
