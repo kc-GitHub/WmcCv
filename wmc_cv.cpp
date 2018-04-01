@@ -19,6 +19,7 @@
    F O R W A R D  D E C L A R A T I O N S
  **********************************************************************************************************************/
 class Idle;
+class EnterPomAddress;
 class EnterCvNumber;
 class EnterCvValueRead;
 class EnterCvValueChange;
@@ -32,7 +33,9 @@ class EnterCvWrite;
 WmcTft wmcCv::m_wmcCvTft;
 uint16_t wmcCv::m_cvNumber    = CV_DEFAULT_NUMBER;
 uint16_t wmcCv::m_cvValue     = CV_DEFAULT_VALUE;
+uint16_t wmcCv::m_PomAddress  = POM_DEFAULT_ADDRESS;
 uint8_t wmcCv::m_timeOutCount = 0;
+bool wmcCv::m_PomActive       = false;
 
 /***********************************************************************************************************************
   F U N C T I O N S
@@ -54,12 +57,162 @@ class Idle : public wmcCv
     {
         switch (e.EventData)
         {
-        case start:
-            m_cvValue  = CV_DEFAULT_VALUE;
-            m_cvNumber = CV_DEFAULT_NUMBER;
+        case startCv:
+            m_PomActive = false;
+            m_cvValue   = CV_DEFAULT_VALUE;
+            m_cvNumber  = CV_DEFAULT_NUMBER;
             transit<EnterCvNumber>();
             break;
+        case startPom:
+            m_PomActive  = true;
+            m_cvValue    = CV_DEFAULT_VALUE;
+            m_cvNumber   = CV_DEFAULT_NUMBER;
+            m_PomAddress = POM_DEFAULT_ADDRESS;
+            transit<EnterPomAddress>();
+            break;
         case stop:
+        case cvNack:
+        case cvData:
+        case update: break;
+        }
+    }
+};
+
+/***********************************************************************************************************************
+ * Enter address of loc where Cv will be changed using POM.
+ */
+class EnterPomAddress : public wmcCv
+{
+    /**
+     */
+    void entry() override { m_wmcCvTft.ShowPomAddress(m_PomAddress, true); };
+
+    /**
+     * Handle forwarded pulse switch events.
+     */
+    void react(cvpulseSwitchEvent const& e)
+    {
+        bool DataChanged = false;
+
+        switch (e.EventData.Status)
+        {
+        case turn:
+            if (e.EventData.Delta > 0)
+            {
+                m_PomAddress++;
+                DataChanged = true;
+            }
+            else if (e.EventData.Delta < 0)
+            {
+                if (m_PomAddress > POM_DEFAULT_ADDRESS)
+                {
+                    m_PomAddress--;
+                    DataChanged = true;
+                }
+                else
+                {
+                    m_PomAddress = POM_MAX_ADDRESS;
+                    DataChanged  = true;
+                }
+            }
+            break;
+        case pushturn:
+            if (e.EventData.Delta > 0)
+            {
+                m_PomAddress += STEP_10;
+                DataChanged = true;
+            }
+            else if (e.EventData.Delta < 0)
+            {
+                if (m_PomAddress > STEP_10)
+                {
+                    m_PomAddress -= STEP_10;
+                    DataChanged = true;
+                }
+                else
+                {
+                    if (m_PomAddress > POM_DEFAULT_ADDRESS)
+                    {
+                        m_PomAddress -= STEP_1;
+                        DataChanged = true;
+                    }
+                    else
+                    {
+                        m_PomAddress = POM_MAX_ADDRESS;
+                        DataChanged  = true;
+                    }
+                }
+            }
+            break;
+        case pushedShort:
+            EventCvProg.Request = cvExit;
+            send_event(EventCvProg);
+            break;
+        case pushedNormal:
+        case pushedlong: transit<EnterCvNumber>(); break;
+        }
+
+        if (DataChanged == true)
+        {
+            if (m_PomAddress > POM_MAX_ADDRESS)
+            {
+                m_PomAddress = POM_DEFAULT_ADDRESS;
+            }
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false);
+        }
+    }
+
+    /**
+     * Handle forwarded push button events.
+     */
+    void react(cvpushButtonEvent const& e)
+    {
+        bool DataChanged = false;
+
+        switch (e.EventData.Button)
+        {
+        case button_0:
+            m_PomAddress = POM_DEFAULT_ADDRESS;
+            DataChanged  = true;
+            break;
+        case button_1:
+            m_PomAddress += STEP_1;
+            DataChanged = true;
+            break;
+        case button_2:
+            m_PomAddress += STEP_10;
+            DataChanged = true;
+            break;
+        case button_3:
+            m_PomAddress += STEP_100;
+            DataChanged = true;
+            break;
+        case button_4:
+        case button_5:
+        case button_none:
+        case button_power: break;
+        }
+
+        if (DataChanged == true)
+        {
+            if (m_PomAddress > POM_MAX_ADDRESS)
+            {
+                m_PomAddress = POM_MAX_ADDRESS;
+            }
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false);
+        }
+    }
+
+    /**
+     * Handle cv command events.
+     */
+    void react(cvEvent const& e) override
+    {
+        switch (e.EventData)
+        {
+        case stop: transit<Idle>(); break;
+        case startCv:
+        case startPom:
         case cvNack:
         case cvData:
         case update: break;
@@ -76,8 +229,11 @@ class EnterCvNumber : public wmcCv
      */
     void entry() override
     {
-        m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
-        m_wmcCvTft.ShowDccNumber(m_cvNumber, true);
+        if (m_PomActive == false)
+        {
+            m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
+        }
+        m_wmcCvTft.ShowDccNumber(m_cvNumber, true, m_PomActive);
     };
 
     /**
@@ -138,13 +294,31 @@ class EnterCvNumber : public wmcCv
             }
             break;
         case pushedShort:
-            EventCvProg.Request = cvExit;
-            send_event(EventCvProg);
+            if (m_PomActive == false)
+            {
+                EventCvProg.Request = cvExit;
+                send_event(EventCvProg);
+            }
+            else
+            {
+                /* Back to entering cv number. */
+                m_wmcCvTft.ShowDccNumberRemove(m_PomActive);
+                transit<EnterPomAddress>();
+            }
             break;
 
             break;
         case pushedNormal:
-        case pushedlong: transit<EnterCvValueRead>(); break;
+        case pushedlong:
+            if (m_PomActive == false)
+            {
+                transit<EnterCvValueRead>();
+            }
+            else
+            {
+                transit<EnterCvValueChange>();
+            }
+            break;
         }
 
         if (DataChanged == true)
@@ -153,7 +327,7 @@ class EnterCvNumber : public wmcCv
             {
                 m_cvNumber = CV_DEFAULT_NUMBER;
             }
-            m_wmcCvTft.ShowDccNumber(m_cvNumber, false);
+            m_wmcCvTft.ShowDccNumber(m_cvNumber, false, m_PomActive);
         }
     }
 
@@ -194,7 +368,7 @@ class EnterCvNumber : public wmcCv
             {
                 m_cvNumber = CV_DEFAULT_NUMBER;
             }
-            m_wmcCvTft.ShowDccNumber(m_cvNumber, false);
+            m_wmcCvTft.ShowDccNumber(m_cvNumber, false, m_PomActive);
         }
     }
 
@@ -206,7 +380,8 @@ class EnterCvNumber : public wmcCv
         switch (e.EventData)
         {
         case stop: transit<Idle>(); break;
-        case start:
+        case startCv:
+        case startPom:
         case cvNack:
         case cvData:
         case update: break;
@@ -241,7 +416,8 @@ class EnterCvValueRead : public wmcCv
         switch (e.EventData)
         {
         case stop: transit<Idle>(); break;
-        case start:
+        case startCv:
+        case startPom: break;
         case cvNack: transit<EnterCvValueChange>(); break;
         case cvData:
             m_cvValue = e.cvValue;
@@ -270,8 +446,11 @@ class EnterCvValueChange : public wmcCv
      */
     void entry() override
     {
-        m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
-        m_wmcCvTft.ShowDccValue(m_cvValue, true);
+        if (m_PomActive == false)
+        {
+            m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
+        }
+        m_wmcCvTft.ShowDccValue(m_cvValue, true, m_PomActive);
     };
 
     /**
@@ -333,7 +512,7 @@ class EnterCvValueChange : public wmcCv
             break;
         case pushedShort:
             /* Back to entering cv number. */
-            m_wmcCvTft.ShowDccValueRemove();
+            m_wmcCvTft.ShowDccValueRemove(m_PomActive);
             transit<EnterCvNumber>();
             break;
         case pushedNormal:
@@ -346,7 +525,7 @@ class EnterCvValueChange : public wmcCv
             {
                 m_cvValue = CV_DEFAULT_VALUE;
             }
-            m_wmcCvTft.ShowDccValue(m_cvValue, false);
+            m_wmcCvTft.ShowDccValue(m_cvValue, false, m_PomActive);
         }
     }
 
@@ -387,7 +566,7 @@ class EnterCvValueChange : public wmcCv
             {
                 m_cvValue = CV_DEFAULT_VALUE;
             }
-            m_wmcCvTft.ShowDccValue(m_cvValue, false);
+            m_wmcCvTft.ShowDccValue(m_cvValue, false, m_PomActive);
         }
     }
 
@@ -399,7 +578,8 @@ class EnterCvValueChange : public wmcCv
         switch (e.EventData)
         {
         case stop: transit<Idle>(); break;
-        case start:
+        case startCv:
+        case startPom:
         case cvNack:
         case cvData:
         case update: break;
@@ -417,15 +597,37 @@ class EnterCvWrite : public wmcCv
      */
     void entry() override
     {
-        m_wmcCvTft.UpdateStatus("Writing CV", true, WmcTft::color_green);
-        EventCvProg.Request  = cvWrite;
+        if (m_PomActive == false)
+        {
+            EventCvProg.Request = cvWrite;
+            m_wmcCvTft.UpdateStatus("Writing CV", true, WmcTft::color_green);
+        }
+        else
+        {
+            EventCvProg.Request = pomWrite;
+        }
+
+        /* Fill the CV data, */
+        EventCvProg.Address  = m_PomAddress;
         EventCvProg.CvNumber = m_cvNumber;
         EventCvProg.CvValue  = m_cvValue;
-        send_event(EventCvProg);
 
-        m_timeOutCount = 0;
-        m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
-    };
+        if (m_PomActive == false)
+        {
+            /* Wait for response when CV programming. */
+            m_timeOutCount = 0;
+            m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
+        }
+        else
+        {
+            /* No response from Z21 when POM programming, so back to entering address. */
+            m_wmcCvTft.ShowDccValueRemove(m_PomActive);
+            m_wmcCvTft.ShowDccNumberRemove(m_PomActive);
+            transit<EnterPomAddress>();
+        }
+
+        send_event(EventCvProg);
+    }
 
     /**
      * Handle cv command events.
@@ -435,12 +637,16 @@ class EnterCvWrite : public wmcCv
         switch (e.EventData)
         {
         case stop: transit<Idle>(); break;
-        case start: break;
+        case startCv:
+        case startPom: break;
         case cvNack:
         case cvData:
             /* Programming ok, back to entering cv number for next CV. */
-            m_wmcCvTft.ShowDccValueRemove();
-            transit<EnterCvNumber>();
+            if (m_PomActive == false)
+            {
+                m_wmcCvTft.ShowDccValueRemove(m_PomActive);
+                transit<EnterCvNumber>();
+            }
             break;
         case update:
             m_timeOutCount++;
