@@ -161,7 +161,7 @@ class EnterPomAddress : public wmcCv
     }
 
     /**
-     * Handle forwarded push button events.
+     * Handle forwarded push button events to reset or increase the address.
      */
     void react(cvpushButtonEvent const& e)
     {
