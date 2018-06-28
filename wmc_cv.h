@@ -11,8 +11,12 @@
  * I N C L U D E S
  **********************************************************************************************************************/
 #include "WmcTft.h"
-#include "Z21Slave.h"
+#include "app_cfg.h"
+#if APP_CFG_UC == APP_CFG_UC_ESP8266
 #include "wmc_event.h"
+#else
+#include "xmc_event.h"
+#endif
 #include <tinyfsm.hpp>
 
 /***********************************************************************************************************************
@@ -88,10 +92,11 @@ protected:
     static const uint16_t STEP_1              = 1;    /* In - decrease by 1 */
     static const uint16_t STEP_10             = 10;   /* Increase by 10 */
     static const uint16_t STEP_100            = 100;  /* Increase by 100 */
+    static const uint16_t STEP_1000           = 1000; /* Increase by 100 */
     static const uint16_t CV_DEFAULT_NUMBER   = 1;    /* Default cv number */
     static const uint16_t CV_DEFAULT_VALUE    = 0;    /* Default cv value */
     static const uint16_t POM_DEFAULT_ADDRESS = 1;    /* Default cv value */
-    static const uint16_t CV_MAX_NUMBER       = 999;  /* Maximum CV number. */
+    static const uint16_t CV_MAX_NUMBER       = 1024; /* Maximum CV number. */
     static const uint16_t CV_MAX_VALUE        = 255;  /* Maximum cv value. */
     static const uint16_t POM_MAX_ADDRESS     = 9999; /* Maximum cv value. */
     static const uint8_t TIME_OUT_20_SEC      = 40;   /* Timeout counter max value based on 0.5sec update. */

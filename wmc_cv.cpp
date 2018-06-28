@@ -170,23 +170,29 @@ class EnterPomAddress : public wmcCv
         switch (e.EventData.Button)
         {
         case button_0:
-            m_PomAddress = POM_DEFAULT_ADDRESS;
-            DataChanged  = true;
-            break;
-        case button_1:
             m_PomAddress += STEP_1;
             DataChanged = true;
             break;
-        case button_2:
+        case button_1:
             m_PomAddress += STEP_10;
             DataChanged = true;
             break;
-        case button_3:
+        case button_2:
             m_PomAddress += STEP_100;
             DataChanged = true;
             break;
+        case button_3:
+            m_PomAddress += STEP_1000;
+            DataChanged = true;
+            break;
         case button_4:
+            m_PomAddress = POM_DEFAULT_ADDRESS;
+            DataChanged  = true;
+            break;
         case button_5:
+            transit<EnterCvNumber>();
+            break;
+            break;
         case button_none:
         case button_power: break;
         }
@@ -339,23 +345,35 @@ class EnterCvNumber : public wmcCv
         switch (e.EventData.Button)
         {
         case button_0:
-            m_cvNumber  = CV_DEFAULT_NUMBER;
-            DataChanged = true;
-            break;
-        case button_1:
             m_cvNumber += STEP_1;
             DataChanged = true;
             break;
-        case button_2:
+        case button_1:
             m_cvNumber += STEP_10;
             DataChanged = true;
             break;
-        case button_3:
+        case button_2:
             m_cvNumber += STEP_100;
             DataChanged = true;
             break;
+        case button_3:
+            m_cvNumber += STEP_1000;
+            DataChanged = true;
+            break;
         case button_4:
+            m_cvNumber  = CV_DEFAULT_NUMBER;
+            DataChanged = true;
+            break;
         case button_5:
+            if (m_PomActive == false)
+            {
+                transit<EnterCvValueRead>();
+            }
+            else
+            {
+                transit<EnterCvValueChange>();
+            }
+            break;
         case button_none:
         case button_power: break;
         }
@@ -537,23 +555,26 @@ class EnterCvValueChange : public wmcCv
         switch (e.EventData.Button)
         {
         case button_0:
-            m_cvValue   = STEP_1;
-            DataChanged = true;
-            break;
-        case button_1:
             m_cvValue += STEP_1;
             DataChanged = true;
             break;
-        case button_2:
+        case button_1:
             m_cvValue += STEP_10;
             DataChanged = true;
             break;
-        case button_3:
+        case button_2:
             m_cvValue += STEP_100;
             DataChanged = true;
             break;
+        case button_3: break;
         case button_4:
+            m_cvValue   = STEP_1;
+            DataChanged = true;
+            break;
         case button_5:
+            transit<EnterCvWrite>();
+            break;
+            break;
         case button_none:
         case button_power: break;
         }
