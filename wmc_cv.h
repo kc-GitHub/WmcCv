@@ -99,11 +99,15 @@ protected:
     static const uint16_t CV_DEFAULT_NUMBER   = 1;    /* Default cv number */
     static const uint16_t CV_DEFAULT_VALUE    = 0;    /* Default cv value */
     static const uint16_t POM_DEFAULT_ADDRESS = 1;    /* Default cv value */
-    static const uint16_t CV_MAX_NUMBER       = 1024; /* Maximum CV number. */
-    static const uint16_t CV_MAX_VALUE        = 255;  /* Maximum cv value. */
-    static const uint16_t POM_MAX_ADDRESS     = 9999; /* Maximum cv value. */
-    static const uint8_t TIME_OUT_20_SEC      = 40;   /* Timeout counter max value based on 0.5sec update. */
-    static const uint8_t TIME_OUT_10_SEC      = 20;   /* Timeout counter max value based on 0.5sec update. */
+#if APP_CFG_UC == APP_CFG_UC_ESP8266
+    static const uint16_t CV_MAX_NUMBER = 1024; /* Maximum CV number. */
+#else
+    static const uint16_t CV_MAX_NUMBER = 255; /* Maximum CV number. */
+#endif
+    static const uint16_t CV_MAX_VALUE    = 255;  /* Maximum cv value. */
+    static const uint16_t POM_MAX_ADDRESS = 9999; /* Maximum cv value. */
+    static const uint8_t TIME_OUT_20_SEC  = 40;   /* Timeout counter max value based on 0.5sec update. */
+    static const uint8_t TIME_OUT_10_SEC  = 20;   /* Timeout counter max value based on 0.5sec update. */
 };
 
 #endif
