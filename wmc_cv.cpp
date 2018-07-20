@@ -679,10 +679,10 @@ class EnterCvWrite : public wmcCv
         case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
-        case responseBusy: break;
+        case responseBusy:
+        case cvData: break;
         case cvNack:
-        case cvData:
-        case responseNok: break;
+        case responseNok:
         case responseReady:
             /* Programming ok, back to entering cv number for next CV. */
             if (m_PomActive == false)
