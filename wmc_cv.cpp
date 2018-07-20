@@ -71,7 +71,10 @@ class Idle : public wmcCv
         case stop:
         case cvNack:
         case cvData:
-        case update: break;
+        case update:
+        case responseNok:
+        case responseBusy:
+        case responseReady: break;
         }
     }
 };
@@ -219,7 +222,10 @@ class EnterPomAddress : public wmcCv
         case startPom:
         case cvNack:
         case cvData:
-        case update: break;
+        case update:
+        case responseNok:
+        case responseBusy:
+        case responseReady: break;
         }
     }
 };
@@ -400,7 +406,10 @@ class EnterCvNumber : public wmcCv
         case startPom:
         case cvNack:
         case cvData:
-        case update: break;
+        case update:
+        case responseNok:
+        case responseBusy:
+        case responseReady: break;
         }
     }
 };
@@ -443,11 +452,20 @@ class EnterCvValueRead : public wmcCv
             m_timeOutCount++;
             m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
 
+            EventCvProg.Request = cvStatusRequest;
+            send_event(EventCvProg);
+
             /* If after 20 seconds still no response continue.... */
             if (m_timeOutCount > TIME_OUT_20_SEC)
             {
                 transit<EnterCvValueChange>();
             }
+            break;
+        case responseBusy: break;
+        case responseNok:
+        case responseReady:
+            transit<EnterCvValueChange>();
+            break;
             break;
         }
     }
@@ -601,7 +619,10 @@ class EnterCvValueChange : public wmcCv
         case startPom:
         case cvNack:
         case cvData:
-        case update: break;
+        case update:
+        case responseBusy:
+        case responseNok:
+        case responseReady: break;
         }
     }
 };
@@ -657,9 +678,12 @@ class EnterCvWrite : public wmcCv
         {
         case stop: transit<Idle>(); break;
         case startCv:
-        case startPom: break;
+        case startPom:
+        case responseBusy: break;
         case cvNack:
         case cvData:
+        case responseNok: break;
+        case responseReady:
             /* Programming ok, back to entering cv number for next CV. */
             if (m_PomActive == false)
             {

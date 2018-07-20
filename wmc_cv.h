@@ -33,7 +33,10 @@ enum cvEventData
     stop,
     cvNack,
     cvData,
-    update
+    update,
+    responseNok,
+    responseBusy,
+    responseReady,
 };
 
 /**
