@@ -679,8 +679,8 @@ class EnterCvWrite : public wmcCv
         case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
-        case responseBusy:
-        case cvData: break;
+        case responseBusy: break;
+        case cvData:
         case cvNack:
         case responseNok:
         case responseReady:
@@ -695,7 +695,7 @@ class EnterCvWrite : public wmcCv
             m_timeOutCount++;
             m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
 
-            /* If after 10 seconds still no response continue.... */
+            /* If after 10 seconds still no response, keep screen to retry writing.... */
             if (m_timeOutCount > TIME_OUT_10_SEC)
             {
                 transit<EnterCvValueChange>();
