@@ -462,8 +462,9 @@ class EnterCvValueRead : public wmcCv
             }
             break;
         case responseBusy: break;
-        case responseNok:
+        case responseNok: transit<EnterCvValueChange>(); break;
         case responseReady:
+            m_cvValue = e.cvValue;
             transit<EnterCvValueChange>();
             break;
             break;
