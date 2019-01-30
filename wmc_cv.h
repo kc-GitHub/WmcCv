@@ -87,25 +87,26 @@ public:
 protected:
     static WmcTft m_wmcCvTft;      /* Display. */
     static uint16_t m_PomAddress;  /* Address of loc to be changed with POM. */
-    static uint16_t m_cvNumber;    /* Cv number to be changed. */
-    static uint16_t m_cvValue;     /* Value of cv number. */
+    static uint16_t m_cvNumber;    /* CV number to be changed. */
+    static uint16_t m_cvValue;     /* Value of CV number. */
     static uint8_t m_timeOutCount; /* Counter for timeout handling. */
     static bool m_PomActive;       /* POM mode programming. */
 
     static const uint16_t STEP_1              = 1;    /* In - decrease by 1 */
     static const uint16_t STEP_10             = 10;   /* Increase by 10 */
     static const uint16_t STEP_100            = 100;  /* Increase by 100 */
-    static const uint16_t STEP_1000           = 1000; /* Increase by 100 */
-    static const uint16_t CV_DEFAULT_NUMBER   = 1;    /* Default cv number */
-    static const uint16_t CV_DEFAULT_VALUE    = 0;    /* Default cv value */
-    static const uint16_t POM_DEFAULT_ADDRESS = 1;    /* Default cv value */
+    static const uint16_t STEP_1000           = 1000; /* Increase by 1000 */
+    static const uint16_t CV_DEFAULT_NUMBER   = 1;    /* Default CV number */
+    static const uint16_t CV_DEFAULT_VALUE    = 0;    /* Default CV value */
+    static const uint16_t POM_DEFAULT_ADDRESS = 1;    /* Default CV value */
+    static const uint16_t CV_MAX_NUMBER       = 1024; /* Maximum CV number. */
 #if APP_CFG_UC == APP_CFG_UC_ESP8266
-    static const uint16_t CV_MAX_NUMBER = 1024; /* Maximum CV number. */
+    static const uint16_t CV_MAX_NUMBER_CV_MODE = 1024; /* Maximum CV number. */
 #else
-    static const uint16_t CV_MAX_NUMBER = 255; /* Maximum CV number. */
+    static const uint16_t CV_MAX_NUMBER_CV_MODE = 255; /* Maximum CV number. */
 #endif
-    static const uint16_t CV_MAX_VALUE    = 255;  /* Maximum cv value. */
-    static const uint16_t POM_MAX_ADDRESS = 9999; /* Maximum cv value. */
+    static const uint16_t CV_MAX_VALUE    = 255;  /* Maximum CV value. */
+    static const uint16_t POM_MAX_ADDRESS = 9999; /* Maximum CV value. */
     static const uint8_t TIME_OUT_20_SEC  = 40;   /* Timeout counter max value based on 0.5sec update. */
     static const uint8_t TIME_OUT_10_SEC  = 20;   /* Timeout counter max value based on 0.5sec update. */
 };

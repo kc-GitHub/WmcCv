@@ -86,7 +86,7 @@ class EnterPomAddress : public wmcCv
 {
     /**
      */
-    void entry() override { m_wmcCvTft.ShowPomAddress(m_PomAddress, true); };
+    void entry() override { m_wmcCvTft.ShowPomAddress(m_PomAddress, true, WmcTft::color_green); };
 
     /**
      * Handle forwarded pulse switch events.
@@ -150,7 +150,16 @@ class EnterPomAddress : public wmcCv
             send_event(EventCvProg);
             break;
         case pushedNormal:
-        case pushedlong: transit<EnterCvNumber>(); break;
+        case pushedlong:
+            if (m_PomAddress == POM_DEFAULT_ADDRESS)
+            {
+                m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_red);
+            }
+            else
+            {
+                transit<EnterCvNumber>();
+            }
+            break;
         }
 
         if (DataChanged == true)
@@ -159,7 +168,7 @@ class EnterPomAddress : public wmcCv
             {
                 m_PomAddress = POM_DEFAULT_ADDRESS;
             }
-            m_wmcCvTft.ShowPomAddress(m_PomAddress, false);
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_yellow);
         }
     }
 
@@ -206,7 +215,7 @@ class EnterPomAddress : public wmcCv
             {
                 m_PomAddress = POM_MAX_ADDRESS;
             }
-            m_wmcCvTft.ShowPomAddress(m_PomAddress, false);
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_yellow);
         }
     }
 
@@ -270,7 +279,14 @@ class EnterCvNumber : public wmcCv
                 }
                 else
                 {
-                    m_cvNumber  = CV_MAX_NUMBER;
+                    if (m_PomActive == true)
+                    {
+                        m_cvNumber = CV_MAX_NUMBER;
+                    }
+                    else
+                    {
+                        m_cvNumber = CV_MAX_NUMBER_CV_MODE;
+                    }
                     DataChanged = true;
                 }
             }
@@ -297,7 +313,14 @@ class EnterCvNumber : public wmcCv
                     }
                     else
                     {
-                        m_cvNumber  = CV_MAX_NUMBER;
+                        if (m_PomActive == true)
+                        {
+                            m_cvNumber = CV_MAX_NUMBER;
+                        }
+                        else
+                        {
+                            m_cvNumber = CV_MAX_NUMBER_CV_MODE;
+                        }
                         DataChanged = true;
                     }
                 }
@@ -333,7 +356,11 @@ class EnterCvNumber : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvNumber > CV_MAX_NUMBER)
+            if (m_PomActive == true)
+            {
+                if (m_cvNumber > CV_MAX_NUMBER) m_cvNumber = CV_DEFAULT_NUMBER;
+            }
+            else if (m_cvNumber > CV_MAX_NUMBER_CV_MODE)
             {
                 m_cvNumber = CV_DEFAULT_NUMBER;
             }
@@ -386,7 +413,11 @@ class EnterCvNumber : public wmcCv
 
         if (DataChanged == true)
         {
-            if (m_cvNumber > CV_MAX_NUMBER)
+            if (m_PomActive == true)
+            {
+                if (m_cvNumber > CV_MAX_NUMBER) m_cvNumber = CV_DEFAULT_NUMBER;
+            }
+            else if (m_cvNumber > CV_MAX_NUMBER_CV_MODE)
             {
                 m_cvNumber = CV_DEFAULT_NUMBER;
             }
