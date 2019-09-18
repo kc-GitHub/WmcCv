@@ -250,7 +250,7 @@ class EnterCvNumber : public wmcCv
     {
         if (m_PomActive == false)
         {
-            m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
+            m_wmcCvTft.UpdateStatus("CV PROGRAMMING", true, WmcTft::color_green);
         }
         m_wmcCvTft.ShowDccNumber(m_cvNumber, true, m_PomActive);
     };
@@ -455,7 +455,7 @@ class EnterCvValueRead : public wmcCv
      */
     void entry() override
     {
-        m_wmcCvTft.UpdateStatus("Reading CV", true, WmcTft::color_green);
+        m_wmcCvTft.UpdateStatus("READING CV", true, WmcTft::color_green);
         EventCvProg.Request  = cvRead;
         EventCvProg.CvNumber = m_cvNumber;
         send_event(EventCvProg);
@@ -514,7 +514,7 @@ class EnterCvValueChange : public wmcCv
     {
         if (m_PomActive == false)
         {
-            m_wmcCvTft.UpdateStatus("CV programming", true, WmcTft::color_green);
+            m_wmcCvTft.UpdateStatus("CV PROGRAMMING", true, WmcTft::color_green);
         }
         m_wmcCvTft.ShowDccValue(m_cvValue, true, m_PomActive);
     };
@@ -672,7 +672,7 @@ class EnterCvWrite : public wmcCv
         if (m_PomActive == false)
         {
             EventCvProg.Request = cvWrite;
-            m_wmcCvTft.UpdateStatus("Writing CV", true, WmcTft::color_green);
+            m_wmcCvTft.UpdateStatus("WRITING CV", true, WmcTft::color_green);
         }
         else
         {
