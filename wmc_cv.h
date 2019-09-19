@@ -30,7 +30,6 @@ enum cvEventData
 {
     startCv = 0,
     startPom,
-    stop,
     cvNack,
     cvData,
     update,

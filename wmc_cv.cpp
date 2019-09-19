@@ -68,7 +68,6 @@ class Idle : public wmcCv
             m_PomAddress = POM_DEFAULT_ADDRESS;
             transit<EnterPomAddress>();
             break;
-        case stop:
         case cvNack:
         case cvData:
         case update:
@@ -205,8 +204,12 @@ class EnterPomAddress : public wmcCv
             transit<EnterCvNumber>();
             break;
             break;
-        case button_none:
-        case button_power: break;
+        case button_power:
+            EventCvProg.Request = cvExit;
+            send_event(EventCvProg);
+            transit<Idle>();
+            break;
+        case button_none: break;
         }
 
         if (DataChanged == true)
@@ -226,7 +229,6 @@ class EnterPomAddress : public wmcCv
     {
         switch (e.EventData)
         {
-        case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
         case cvNack:
@@ -407,8 +409,12 @@ class EnterCvNumber : public wmcCv
                 transit<EnterCvValueChange>();
             }
             break;
-        case button_none:
-        case button_power: break;
+        case button_power:
+            EventCvProg.Request = cvExit;
+            send_event(EventCvProg);
+            transit<Idle>();
+            break;
+        case button_none: break;
         }
 
         if (DataChanged == true)
@@ -432,7 +438,6 @@ class EnterCvNumber : public wmcCv
     {
         switch (e.EventData)
         {
-        case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
         case cvNack:
@@ -471,7 +476,6 @@ class EnterCvValueRead : public wmcCv
     {
         switch (e.EventData)
         {
-        case stop: transit<Idle>(); break;
         case startCv:
         case startPom: break;
         case cvNack: transit<EnterCvValueChange>(); break;
@@ -625,8 +629,12 @@ class EnterCvValueChange : public wmcCv
             transit<EnterCvWrite>();
             break;
             break;
-        case button_none:
-        case button_power: break;
+        case button_power:
+            EventCvProg.Request = cvExit;
+            send_event(EventCvProg);
+            transit<Idle>();
+            break;
+        case button_none: break;
         }
 
         if (DataChanged == true)
@@ -646,7 +654,6 @@ class EnterCvValueChange : public wmcCv
     {
         switch (e.EventData)
         {
-        case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
         case cvNack:
@@ -708,7 +715,6 @@ class EnterCvWrite : public wmcCv
     {
         switch (e.EventData)
         {
-        case stop: transit<Idle>(); break;
         case startCv:
         case startPom:
         case responseBusy: break;
