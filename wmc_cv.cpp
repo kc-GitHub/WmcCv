@@ -46,7 +46,7 @@ class Idle : public wmcCv
 {
     /**
      */
-    void entry() override{};
+    void entry() override{ m_PomActive = false; };
 
     /**
      * Handle cv command events.
@@ -59,6 +59,7 @@ class Idle : public wmcCv
             m_PomActive = false;
             m_cvValue   = CV_DEFAULT_VALUE;
             m_cvNumber  = CV_DEFAULT_NUMBER;
+            m_wmcCvTft.UpdateStatus("CV PROGRAMMING", true, WmcTft::color_green);
             transit<EnterCvNumber>();
             break;
         case startPom:
@@ -66,6 +67,7 @@ class Idle : public wmcCv
             m_cvValue    = CV_DEFAULT_VALUE;
             m_cvNumber   = CV_DEFAULT_NUMBER;
             m_PomAddress = POM_DEFAULT_ADDRESS;
+            m_wmcCvTft.UpdateStatus("POM PROGRAMMING", true, WmcTft::color_green);
             transit<EnterPomAddress>();
             break;
         case cvNack:
@@ -147,6 +149,7 @@ class EnterPomAddress : public wmcCv
         case pushedShort:
             EventCvProg.Request = cvExit;
             send_event(EventCvProg);
+            transit<Idle>();
             break;
         case pushedNormal:
         case pushedlong:
@@ -167,7 +170,7 @@ class EnterPomAddress : public wmcCv
             {
                 m_PomAddress = POM_DEFAULT_ADDRESS;
             }
-            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_yellow);
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_green);
         }
     }
 
@@ -218,7 +221,7 @@ class EnterPomAddress : public wmcCv
             {
                 m_PomAddress = POM_MAX_ADDRESS;
             }
-            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_yellow);
+            m_wmcCvTft.ShowPomAddress(m_PomAddress, false, WmcTft::color_green);
         }
     }
 
@@ -250,10 +253,6 @@ class EnterCvNumber : public wmcCv
      */
     void entry() override
     {
-        if (m_PomActive == false)
-        {
-            m_wmcCvTft.UpdateStatus("CV PROGRAMMING", true, WmcTft::color_green);
-        }
         m_wmcCvTft.ShowDccNumber(m_cvNumber, true, m_PomActive);
     };
 
@@ -333,6 +332,7 @@ class EnterCvNumber : public wmcCv
             {
                 EventCvProg.Request = cvExit;
                 send_event(EventCvProg);
+                transit<Idle>();
             }
             else
             {
@@ -340,8 +340,6 @@ class EnterCvNumber : public wmcCv
                 m_wmcCvTft.ShowDccNumberRemove(m_PomActive);
                 transit<EnterPomAddress>();
             }
-            break;
-
             break;
         case pushedNormal:
         case pushedlong:
@@ -726,6 +724,7 @@ class EnterCvWrite : public wmcCv
             if (m_PomActive == false)
             {
                 m_wmcCvTft.ShowDccValueRemove(m_PomActive);
+                m_wmcCvTft.UpdateStatus("CV PROGRAMMING", true, WmcTft::color_green);
                 transit<EnterCvNumber>();
             }
             break;
