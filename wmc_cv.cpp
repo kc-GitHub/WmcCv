@@ -212,7 +212,7 @@ class EnterPomAddress : public wmcCv
             send_event(EventCvProg);
             transit<Idle>();
             break;
-        case button_none: break;
+        default: break;
         }
 
         if (DataChanged == true)
@@ -412,7 +412,7 @@ class EnterCvNumber : public wmcCv
             send_event(EventCvProg);
             transit<Idle>();
             break;
-        case button_none: break;
+        default: break;
         }
 
         if (DataChanged == true)
@@ -464,7 +464,7 @@ class EnterCvValueRead : public wmcCv
         send_event(EventCvProg);
 
         m_timeOutCount = 0;
-        m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
+        m_wmcCvTft.UpdateRunningWheel();
     };
 
     /**
@@ -483,7 +483,7 @@ class EnterCvValueRead : public wmcCv
             break;
         case update:
             m_timeOutCount++;
-            m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
+            m_wmcCvTft.UpdateRunningWheel();
 
             EventCvProg.Request = cvStatusRequest;
             send_event(EventCvProg);
@@ -632,7 +632,7 @@ class EnterCvValueChange : public wmcCv
             send_event(EventCvProg);
             transit<Idle>();
             break;
-        case button_none: break;
+        default: break;
         }
 
         if (DataChanged == true)
@@ -693,7 +693,7 @@ class EnterCvWrite : public wmcCv
         {
             /* Wait for response when CV programming. */
             m_timeOutCount = 0;
-            m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
+            m_wmcCvTft.UpdateRunningWheel();
         }
         else
         {
@@ -730,7 +730,7 @@ class EnterCvWrite : public wmcCv
             break;
         case update:
             m_timeOutCount++;
-            m_wmcCvTft.UpdateRunningWheel(m_timeOutCount);
+            m_wmcCvTft.UpdateRunningWheel();
 
             /* If after 10 seconds still no response, keep screen to retry writing.... */
             if (m_timeOutCount > TIME_OUT_10_SEC)
